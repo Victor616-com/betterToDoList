@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PlusIcon from "./PlusIcon";
 import Column from "./Column";
 import { DndContext, DragOverlay, closestCenter } from "@dnd-kit/core";
@@ -7,13 +7,20 @@ import { createPortal } from "react-dom";
 import Task from "./Task";
 
 const KanbanBoard = () => {
-    const [columns, setColumns] = useState([]);
+    const [columns, setColumns] = useState(() => {
+        const savedColumns = localStorage.getItem("columns");
+        return savedColumns ? JSON.parse(savedColumns) : [];
+    });
+    const [tasks, setTasks] = useState(() => {
+        const savedTasks = localStorage.getItem("tasks");
+        return savedTasks ? JSON.parse(savedTasks) : [];
+    });
+
     const colors = ["#7C00FE", "#F5014F", "#27CA86", "#FFAF01", "#0188FF", "#E14942"];
     const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
     const [activeColumn, setActiveColumn] = useState(null);
     const [activeTask, setActiveTask] = useState(null);
-    const [tasks, setTasks] = useState([]);
-    
+
     function createNewColumn() {
         const columnToAdd = {
             id: generateID(),
@@ -91,6 +98,16 @@ const KanbanBoard = () => {
         }));
     }
 
+    // Save columns to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem("columns", JSON.stringify(columns));
+    }, [columns]);
+
+    // Save tasks to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+    }, [tasks]);
+
     return (
         <div className="app-content-wrapper">
             <DndContext onDragStart={onDragStart} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
@@ -118,8 +135,9 @@ const KanbanBoard = () => {
                         {activeColumn && (
                             <Column 
                                 column={activeColumn} 
-                                tasks={tasks.filter(
-                                    (task) => task.columnId === activeColumn.id)} createTask={createTask} />
+                                tasks={tasks.filter((task) => task.columnId === activeColumn.id)} 
+                                createTask={createTask} 
+                            />
                         )}
                         {activeTask && <Task task={activeTask} />}
                     </DragOverlay>, document.body
