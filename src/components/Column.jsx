@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import DeleteIcon from "./DeleteIcon";
 import EditIcon from "./EditIcon";
 import dragIcon from "../assets/drag.svg"
-import { horizontalListSortingStrategy, rectSwappingStrategy, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { horizontalListSortingStrategy, rectSwappingStrategy, SortableContext, useSortable, verticalListSortingStrategy, } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import PlusIcon from "./PlusIcon";
 import Task from "./Task";
@@ -32,9 +32,11 @@ const darkenColor = (color, amount) => {
     return (usePound ? "#" : "") + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
 }
 
-const Column = ({ column, setColumns, columns, tasks, createTask, deleteTask,  updateTask }) => {
+const Column = ({ column, setColumns, columns, tasks, createTask, deleteTask,  updateTask, colors }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [newTitle, setNewTitle] = useState(column.newTitle || column.title);
+    const [placeholderHeight, setPlaceholderHeight] = useState(0);
+    const [showColorPicker, setShowColorPicker] = useState(false);
     const tasksIds = useMemo(() => {
         return tasks.map(task => task.id)
     }, [tasks])
@@ -48,16 +50,25 @@ const Column = ({ column, setColumns, columns, tasks, createTask, deleteTask,  u
         },
         
     });
+    const componentRef = useRef(null);
 
-    const style = {
-        
-        
-        transform: CSS.Transform.toString(transform),
-    };
+    const combinedRef = useCallback((node) => {
+        setNodeRef(node);
+        componentRef.current = node;
+    }, [setNodeRef]);
+
+    useEffect(() => {
+        if (componentRef.current) {
+            setPlaceholderHeight(componentRef.current.offsetHeight);
+            console.log("useEffect ran, height is:", componentRef.current.offsetHeight);
+        }
+    }, [componentRef.current]);
+
 
     if (isDragging) {
-        return <div ref={setNodeRef} className="column-placeholder"></div>
+        return <div ref={setNodeRef} className="column-placeholder" style={{height: `${placeholderHeight}px`}}></div>
     }
+
     const handleDeleteColumn = (indexToRemove) => {
         const updatedColumns = columns.filter((col) => col.id !== indexToRemove)
                                      .map((col, idx) => ({ ...col, title: `Column ${idx + 1}` }));
@@ -88,17 +99,29 @@ const Column = ({ column, setColumns, columns, tasks, createTask, deleteTask,  u
     const taskBorder = darkenColor(column.bgColor, -15);
 
     
-
+    const toggleColorPicker = () => {
+        setShowColorPicker(!showColorPicker);
+    };
+    
 
     return (
         <div 
-            ref={setNodeRef}
+            ref={combinedRef}
             className="column" 
             style={{  backgroundColor: column.bgColor }}>
+           
             <div  className="column-title" style={{ backgroundColor: darkenedColor }}>
-                <div className="drag-tite-wrapper">
-                    <img {...attributes} {...listeners} className="drag-icon" src={dragIcon}></img>
-                    {isEditing ? (
+
+                {showColorPicker ? (
+                    <div className="color-picker" style={{ backgroundColor: darkenedColor }}>
+                        {colors.map((color, id) => (
+                            <div className="color-object" key={id} style={{ backgroundColor: color }} ></div> //Here there should be a onClick={changeColumnColor(color)}
+                        ))}
+                    </div>
+                ) : (
+                    <div className="drag-title-wrapper">
+                        <img {...attributes} {...listeners} className="drag-icon" src={dragIcon} alt="Drag Icon" />
+                        {isEditing ? (
                         <input
                             type="text"
                             value={newTitle}
@@ -108,18 +131,21 @@ const Column = ({ column, setColumns, columns, tasks, createTask, deleteTask,  u
                             onFocus={(e) => e.target.select()}
                             autoFocus
                         />
-                    ) : (
+                        ) : (
                         <h3 onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}>
                             {newTitle && newTitle !== column.title ? newTitle : column.title}
                         </h3>
-                    )}
-                </div>
-                
+                        )}
+                    </div>
+                )}
+
                 <div className="edit-delete-wrapper">
-                    <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}><EditIcon /></button>
+                    <button onClick={toggleColorPicker}><EditIcon /></button>
                     <button onClick={(e) => { e.stopPropagation(); handleDeleteColumn(column.id); }}><DeleteIcon /></button>
                 </div>
+                
             </div>
+
             <div className="column-content">
                 <SortableContext items={tasksIds} strategy={verticalListSortingStrategy} >
                     {tasks.map((task) => (

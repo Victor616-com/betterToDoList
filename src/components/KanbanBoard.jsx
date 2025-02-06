@@ -112,8 +112,11 @@ const KanbanBoard = () => {
         <div className="app-content-wrapper">
             <DndContext onDragStart={onDragStart} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
                 <SortableContext items={columnsId} strategy={verticalListSortingStrategy}>
+
                     <div className="columns-wrapper">
+                       
                         {columns.map((column) => (
+                            
                             <Column
                                 key={column.id}
                                 column={column}
@@ -123,6 +126,7 @@ const KanbanBoard = () => {
                                 tasks={tasks.filter(task => task.columnId === column.id)}
                                 deleteTask={deleteTask}
                                 updateTask={updateTask}
+                                colors={colors}
                             />
                         ))}
                     </div>

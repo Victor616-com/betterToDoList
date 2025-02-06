@@ -87,26 +87,28 @@ body {
   padding-left: 10px;
   border-radius: 10px 10px 0 0;
   overflow: hidden;
+  position: relative;
 }
-.column .column-title .drag-icon {
+.drag-icon {
   height: 40px;
   width: auto;
-  cursor: move;
+  cursor: grabbing;
 }
-.column .column-title .drag-tite-wrapper {
+.drag-title-wrapper {
   display: flex;
+  flex-direction: row;
   align-items: center;
 }
-.column .column-title input {
+.column-title input {
   all: unset;
   overflow: hidden;
   font-size: 18px;
 }
-.column .column-title h3 {
+.drag-title-wrapper  h3 {
   color: var(--white);
   font-size: 18px;
   cursor: pointer;
-  max-width: 50pxt;
+  max-width: 180px;
   overflow: hidden;
 }
 .column .column-title .edit-delete-wrapper {
@@ -125,6 +127,28 @@ body {
   all: unset;
   cursor: pointer;
 }
+
+.column .color-picker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 40px;
+  border-radius: 10px;
+  padding-left: 5px;
+}
+.column .color-picker .color-object {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  border: solid;
+  border-width: 3px;
+  border-color: var(--white);
+  cursor: pointer;
+ 
+ 
+}
+
 .column .column-content {
   display: flex;
   padding: 10px;
