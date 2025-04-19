@@ -32,7 +32,8 @@ const darkenColor = (color, amount) => {
     return (usePound ? "#" : "") + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
 }
 
-const Column = ({ column, setColumns, columns, tasks, createTask, deleteTask,  updateTask, colors }) => {
+//Morten added callback function changeBgColor to argumentlist:
+const Column = ({ column, setColumns, columns, tasks, createTask, deleteTask,  updateTask, colors, changeBgColor }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [newTitle, setNewTitle] = useState(column.newTitle || column.title);
     const [placeholderHeight, setPlaceholderHeight] = useState(0);
@@ -56,6 +57,12 @@ const Column = ({ column, setColumns, columns, tasks, createTask, deleteTask,  u
         setNodeRef(node);
         componentRef.current = node;
     }, [setNodeRef]);
+
+    // Morten: Function calls callback function that changes the color of the specific column
+    const handleColorChange = (event) => {
+        changeBgColor(column.id, event.target.getAttribute('data-value'));
+        toggleColorPicker();
+    };
 
     useEffect(() => {
         if (componentRef.current) {
@@ -115,7 +122,7 @@ const Column = ({ column, setColumns, columns, tasks, createTask, deleteTask,  u
                 {showColorPicker ? (
                     <div className="color-picker" style={{ backgroundColor: darkenedColor }}>
                         {colors.map((color, id) => (
-                            <div className="color-object" key={id} style={{ backgroundColor: color }} ></div> //Here there should be a onClick={changeColumnColor(color)}
+                            <div className="color-object" key={id} data-value={color} style={{ backgroundColor: color }} onClick={handleColorChange} ></div> //Morten added onclick eventlistener and handler
                         ))}
                     </div>
                 ) : (

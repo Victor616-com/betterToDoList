@@ -39,6 +39,13 @@ const KanbanBoard = () => {
         return colors[Math.floor(Math.random() * colors.length)];
     }
 
+    // Morten: Callback function to change the specific columns background color
+    const changeBgColor = (id, newColor) => {
+        setColumns(columns.map(column => 
+            column.id === id ? { ...column, bgColor: newColor } : column
+        ));
+    };
+
     function onDragStart(event) {
         const { active } = event;
         if (active.data.current?.type === "Column") {
@@ -127,6 +134,8 @@ const KanbanBoard = () => {
                                 deleteTask={deleteTask}
                                 updateTask={updateTask}
                                 colors={colors}
+                                // Morten: changeBgColor callback function transferred to child as prop
+                                changeBgColor={changeBgColor} 
                             />
                         ))}
                     </div>
